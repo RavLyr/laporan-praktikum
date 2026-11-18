@@ -23,6 +23,8 @@ jalankan `scripts/selfcheck.py`.
 
 ## Alur
 
+Path `scripts/`, `assets/`, `references/` di bawah relatif terhadap folder skill ini, bukan folder kerja pengguna.
+
 1. Baca modul (markdown/PDF/docx) dan daftar gambar yang diberikan pengguna.
 2. Tentukan profil. Kalau ragu, tanya. Jangan menebak.
 3. Petakan gambar ke langkah percobaan. Urutan berkas biasanya urutan langkah;
@@ -39,7 +41,7 @@ jalankan `scripts/selfcheck.py`.
    ```bash
    cp out.docx /mnt/c/Users/<USER>/cek.docx
    powershell.exe -NoProfile -Command "\$w=New-Object -ComObject Word.Application; \$w.Visible=\$false; \$w.DisplayAlerts=0; \$d=\$w.Documents.Open('C:\Users\<USER>\cek.docx',[ref]\$false,[ref]\$true); \$d.Fields.Update(); \$d.ExportAsFixedFormat('C:\Users\<USER>\cek.pdf',17); \$d.Close(0); \$w.Quit()"
-   pdftoppm -png -r 70 /mnt/c/Users/<USER>/cek.pdf /tmp/opencode/cek/p
+   pdftoppm -png -r 70 /mnt/c/Users/<USER>/cek.pdf /tmp/cek/p
    ```
    Nama berkas Windows harus baru tiap ekspor, kalau tidak Word memakai cache.
 

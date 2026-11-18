@@ -1,6 +1,6 @@
 # laporan-praktikum
 
-Skill [OpenCode](https://opencode.ai) / agent coding untuk membuat **laporan praktikum `.docx`** yang mengikuti format resmi kampus. Kamu beri modul praktikum dan folder screenshot, agent menulis spec JSON dan prosa Indonesia, lalu skrip membangun `.docx` dari template resmi.
+Skill agent coding (OpenCode, Claude Code, Codex, Antigravity, dll) untuk membuat **laporan praktikum `.docx`** yang mengikuti format resmi kampus. Kamu beri modul praktikum dan folder screenshot, agent menulis spec JSON dan prosa Indonesia, lalu skrip membangun `.docx` dari template resmi.
 
 ## Fitur
 
@@ -36,21 +36,46 @@ skills/laprak/
 
 ## Instalasi
 
-Skill dibaca agent dari folder skills. Salin folder `skills/laprak` ke lokasi yang sesuai.
+Semua agent di bawah memakai format `SKILL.md` yang sama ([standar Agent Skills](https://agentskills.io)). Yang beda cuma folder tujuan.
 
-**OpenCode (global):**
+### Cara cepat (semua agent)
+
+```bash
+npx skills add RavLyr/laporan-praktikum
+```
+
+Perintah ini ([vercel-labs/skills](https://github.com/vercel-labs/skills)) menanyakan agent mana yang mau dipasangi, lalu menaruh skill di folder yang benar.
+
+### Manual
 
 ```bash
 git clone https://github.com/RavLyr/laporan-praktikum.git
-mkdir -p ~/.config/opencode/skills
-cp -r laporan-praktikum/skills/laprak ~/.config/opencode/skills/
+cp -r laporan-praktikum/skills/laprak <FOLDER-TUJUAN>/
 ```
 
-**OpenCode (per proyek):** salin ke `.opencode/skills/laprak` di repo proyekmu.
+| Agent | Global (semua proyek) | Per proyek |
+|---|---|---|
+| OpenCode | `~/.config/opencode/skills/` | `.opencode/skills/` |
+| Claude Code | `~/.claude/skills/` | `.claude/skills/` |
+| Codex CLI | `~/.agents/skills/` | `.agents/skills/` |
+| Antigravity (IDE) | `~/.gemini/config/skills/` | `.agents/skills/` |
+| Antigravity CLI | `~/.gemini/antigravity-cli/skills/` | `.agents/skills/` |
 
-**Claude Code:** salin ke `~/.claude/skills/laprak`.
+Contoh Claude Code global: `cp -r laporan-praktikum/skills/laprak ~/.claude/skills/`.
 
-Restart agent. Skill `laprak` akan muncul di daftar skill.
+Agent lain (Cursor, Cline, Copilot, dll): pakai `npx skills add`, atau lihat dokumentasi agent-nya untuk folder skills. Isinya tetap folder `laprak` yang sama.
+
+Restart agent bila skill belum muncul. Cek dengan bertanya "skill apa saja yang tersedia?" atau `/skills`.
+
+### Memanggil skill
+
+| Agent | Cara |
+|---|---|
+| Claude Code | `/laprak` atau langsung minta "bikin laprak ..." |
+| Codex | `$laprak`, atau minta langsung |
+| OpenCode, Antigravity | minta langsung, skill terpicu lewat deskripsinya |
+
+Path `scripts/...` di `SKILL.md` relatif terhadap folder skill `laprak`. Folder tujuan di atas bisa berubah antar versi agent, jadi cocokkan dengan dokumentasi resminya bila tidak terdeteksi.
 
 ### Dependensi
 
