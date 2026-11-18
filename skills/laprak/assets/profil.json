@@ -1,0 +1,48 @@
+{
+  "srwe": {
+    "template": "srwe.docx",
+    "judul_bab": true,
+    "judul_style": "Heading 1",
+    "heading": ["Heading 2", "Heading 3", "Heading 3"],
+    "heading_ind": {"left": 709, "hanging": 709},
+    "caption_gambar_style": "captiongambar",
+    "caption_tabel_style": "Caption",
+    "caption_tabel_rata": "kiri",
+    "seq_suffix": "",
+    "paragraf": {"first_line": 709, "line": 1.5, "after": 0},
+    "daftar": {"left": 720, "hanging": 720},
+    "gambar": {"max_w": 11.67, "max_h": 12.74, "style": "List Paragraph"},
+    "tabel": {
+      "style": "Table Grid",
+      "width": 7938,
+      "header_fill": "FF89FF",
+      "header_color": "FFFFFF",
+      "border": false
+    },
+    "kode": {"font": "Courier New", "size": 10, "indent": 709},
+    "break_antar_bagian": true
+  },
+
+  "eldas": {
+    "template": "eldas.docx",
+    "judul_bab": false,
+    "judul_style": "Heading 1",
+    "heading": ["Heading 2", "Heading 3", "Heading 4"],
+    "heading_ind": {"left": 851, "hanging": 851},
+    "caption_gambar_style": "Caption",
+    "caption_tabel_style": "Caption",
+    "seq_suffix": "_",
+    "paragraf": {"first_line": 709, "line": 1.5, "after": 0},
+    "daftar": {"left": 851, "hanging": 851},
+    "gambar": {"max_w": 14.0, "max_h": 11.92, "style": "Normal"},
+    "tabel": {
+      "style": "Normal Table",
+      "width": 0,
+      "header_fill": "E8EEF5",
+      "header_color": null,
+      "border": true
+    },
+    "kode": {"font": "Courier New", "size": 10, "indent": 709},
+    "break_antar_bagian": true
+  }
+}
