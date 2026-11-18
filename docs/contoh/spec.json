@@ -1,0 +1,33 @@
+{
+  "profil": "srwe",
+  "bab": 5,
+  "judul": "Konfigurasi DHCP\nPada Jaringan Nirkabel",
+  "output": "Laporan-Modul-5.docx",
+  "bagian": [
+    {"judul": "Tujuan", "daftar": [
+      "Praktikan mampu mengonfigurasi layanan DHCP pada router.",
+      "Praktikan mampu memverifikasi klien memperoleh alamat IP."
+    ]},
+    {"judul": "Percobaan", "sub": [
+      {"judul": "Percobaan 1",
+       "isi": [{"tabel": {
+         "caption": "Alamat Perangkat",
+         "header": ["Perangkat", "Interface", "Alamat IP"],
+         "rows": [["Router", "G0/0", "192.168.10.1"], ["PC1", "NIC", "DHCP"]],
+         "widths": [3.0, 2.5, 3.5]}}],
+       "daftar": [
+         {"teks": "Susun topologi seperti pada Gambar 5.1.",
+          "gambar": {"file": "gambar/01-topologi.png", "caption": "Topologi Percobaan 1"}},
+         {"teks": "Aktifkan layanan DHCP pada router.",
+          "kode": ["Router>enable", "Router#configure terminal", "Router(config)#ip dhcp pool LAN"]}
+       ]}
+    ]},
+    {"judul": "Hasil dan Analisis", "sub": [
+      {"judul": "Percobaan 1", "isi": [{
+        "paragraf": ["Klien memperoleh alamat dari *pool* router. *Ping* ke *gateway* berhasil, seperti pada Gambar 5.2."],
+        "gambar": [{"file": "gambar/02-hasil-ping.png", "caption": "Hasil Ping ke Gateway"}]
+      }]}
+    ]},
+    {"judul": "Kesimpulan", "daftar": ["Layanan DHCP membagikan alamat IP secara otomatis kepada klien."]}
+  ]
+}

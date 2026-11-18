@@ -19,6 +19,9 @@ Skill agent coding (OpenCode, Claude Code, Codex, Antigravity, dll) untuk membua
 ## Struktur
 
 ```
+docs/
+├── CARA-PAKAI.md             # panduan lengkap
+└── contoh/                   # spec.json + gambar contoh siap build
 skills/laprak/
 ├── SKILL.md                  # instruksi untuk agent (alur, aturan wajib)
 ├── assets/
@@ -95,6 +98,8 @@ python skills/laprak/scripts/selfcheck.py
 ```
 
 ## Cara pakai
+
+Panduan lengkap (bahan, prompt, cek di Word, penyesuaian format, troubleshooting): **[docs/CARA-PAKAI.md](docs/CARA-PAKAI.md)**. Ringkasnya di bawah.
 
 ### Lewat agent (disarankan)
 
