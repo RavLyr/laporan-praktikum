@@ -1,6 +1,6 @@
 # laporan-praktikum
 
-Skill untuk agent coding yang membuat **laporan praktikum `.docx`** sesuai format resmi kampus. Kamu beri modul praktikum dan folder screenshot. Agent menyusun `spec.json` dan prosa Indonesia, lalu skrip membangun `.docx` dari template resmi, lengkap dengan heading bernomor, caption `SEQ`, tabel berwarna, dan gambar.
+**Laprak Teknik Komputer.** Skill untuk agent coding yang membuat **laporan praktikum `.docx`** praktikum Teknik Komputer (jaringan, elektronika, sistem digital) sesuai format resmi kampus. Kamu beri modul praktikum dan folder screenshot. Agent menyusun `spec.json` dan prosa Indonesia, lalu skrip membangun `.docx` dari template resmi, lengkap dengan heading bernomor, caption `SEQ`, tabel berwarna, dan gambar.
 
 Format skill-nya mengikuti standar [Agent Skills](https://agentskills.io), jadi satu paket yang sama jalan di **Claude Code, Codex, OpenCode, Antigravity**, dan puluhan agent lain.
 
@@ -69,7 +69,7 @@ modul praktikum + screenshot + data hasil
 
 Agent hanya mengisi **isi** (`spec.json`). **Format** datang dari template, jadi hasilnya konsisten antar modul. Yang berganti per modul hanya nomor BAB, judul, dan isi.
 
-Agent memuat `SKILL.md` saat permintaanmu cocok dengan `description`-nya (misalnya "laprak", "laporan praktikum", "SRWE", "ELDAS"), atau saat kamu memanggilnya langsung.
+Agent memuat `SKILL.md` saat permintaanmu cocok dengan `description`-nya (misalnya "laprak", "laporan praktikum", "teknik komputer", "jaringan", "elektronika", "sistem digital"), atau saat kamu memanggilnya langsung.
 
 ## Prasyarat
 
@@ -197,8 +197,8 @@ Skema lengkap: [spec-schema.md](skills/laprak/references/spec-schema.md).
 
 | Profil | Untuk | Ciri |
 |---|---|---|
-| `srwe` | SRWE / jaringan | judul berawalan "BAB V" dua baris, caption gambar `captiongambar`, header tabel `FF89FF`, gambar maks 11,67 cm |
-| `eldas` | Elektronika Dasar / Sistem Digital | judul tanpa "BAB", seluruh caption style `Caption`, header tabel `E8EEF5`, gambar maks 14 cm, heading sampai 4 tingkat |
+| `srwe` | praktikum jaringan komputer (router, switch, wireless) | judul berawalan "BAB V" dua baris, caption gambar `captiongambar`, header tabel `FF89FF`, gambar maks 11,67 cm |
+| `eldas` | praktikum elektronika dasar dan sistem digital (rangkaian, gerbang logika) | judul tanpa "BAB", seluruh caption style `Caption`, header tabel `E8EEF5`, gambar maks 14 cm, heading sampai 4 tingkat |
 
 Ragu memilih? Lihat contoh laporan dari asisten atau dosen. Ada kata "BAB" di judul dan tabel pink berarti `srwe`.
 
@@ -230,8 +230,8 @@ docs/
 skills/laprak/
 ├── SKILL.md                  # instruksi untuk agent (alur, aturan wajib)
 ├── assets/
-│   ├── srwe.docx             # template kosong profil SRWE
-│   ├── eldas.docx            # template kosong profil ELDAS
+│   ├── srwe.docx             # template kosong profil srwe (jaringan)
+│   ├── eldas.docx            # template kosong profil eldas (elektronika, digital)
 │   └── profil.json           # parameter format tiap profil
 ├── scripts/
 │   ├── build_laprak.py       # generator spec.json -> .docx

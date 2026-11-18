@@ -1,7 +1,7 @@
 # Skema spec.json
 
 Dokumen dibangun dari daftar **bagian** bersarang. Tidak ada bagian yang dipaksakan,
-jadi satu skema melayani SRWE, Elektronika Dasar, Sistem Digital, dan modul lain
+jadi satu skema melayani praktikum jaringan, elektronika dasar, sistem digital, dan modul lain
 dengan struktur serupa.
 
 ```jsonc
@@ -61,7 +61,7 @@ Satu blok boleh menggabungkan beberapa kunci. Urutan render selalu:
 `gambar` boleh berupa string, satu objek, atau daftar objek. `tabel` boleh satu objek
 atau daftar objek.
 
-## Contoh ringkas: SRWE
+## Contoh ringkas: jaringan (profil `srwe`)
 
 ```jsonc
 "bagian": [
@@ -78,7 +78,7 @@ atau daftar objek.
 ]
 ```
 
-## Contoh ringkas: Elektronika Dasar
+## Contoh ringkas: elektronika dasar (profil `eldas`)
 
 ```jsonc
 "bagian": [

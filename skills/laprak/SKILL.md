@@ -1,6 +1,6 @@
 ---
 name: laprak
-description: "Membuat laporan praktikum (.docx) yang persis mengikuti format resmi kampus: heading bernomor otomatis, caption field SEQ, tabel data berwarna, tabel kode, gambar beserta caption. Mendukung profil SRWE/jaringan dan Elektronika Dasar/Sistem Digital. Dipakai saat pengguna memberi modul praktikum plus folder screenshot dan minta laporan jadi. Trigger: laprak, laporan praktikum, SRWE, ELDAS, sistem digital, bikin laporan modul."
+description: "Membuat laporan praktikum (.docx) yang persis mengikuti format resmi kampus: heading bernomor otomatis, caption field SEQ, tabel data berwarna, tabel kode, gambar beserta caption. Untuk praktikum Teknik Komputer: profil jaringan komputer dan profil elektronika dasar/sistem digital. Dipakai saat pengguna memberi modul praktikum plus folder screenshot dan minta laporan jadi. Trigger: laprak, laporan praktikum, teknik komputer, jaringan komputer, elektronika dasar, sistem digital, bikin laporan modul."
 ---
 
 # Laporan Praktikum

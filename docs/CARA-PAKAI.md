@@ -40,8 +40,8 @@ Agent hanya menyusun isi (`spec.json`). Format (font, margin, penomoran, warna t
 
 | Profil | Pakai untuk | Beda utama |
 |---|---|---|
-| `srwe` | SRWE / jaringan | judul "BAB V" dua baris, header tabel pink `FF89FF`, gambar maks 11,67 cm |
-| `eldas` | Elektronika Dasar / Sistem Digital | judul tanpa "BAB", header tabel biru muda `E8EEF5`, gambar maks 14 cm, heading sampai 4 tingkat |
+| `srwe` | praktikum jaringan komputer (router, switch, wireless) | judul "BAB V" dua baris, header tabel pink `FF89FF`, gambar maks 11,67 cm |
+| `eldas` | praktikum elektronika dasar dan sistem digital | judul tanpa "BAB", header tabel biru muda `E8EEF5`, gambar maks 14 cm, heading sampai 4 tingkat |
 
    Ragu? Lihat laporan contoh dari asisten atau dosen. Kalau ada kata "BAB" di judul dan tabel berwarna pink, itu `srwe`.
 
