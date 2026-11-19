@@ -156,8 +156,11 @@ def add_runs(p, text, istilah, size=None, bold=False, color=None, font=TNR, no_i
 # ---------- pembangun ----------
 
 class Builder:
-    def __init__(self, spec):
+    def __init__(self, spec, ketat=False):
         self.spec = spec
+        self.ketat = ketat
+        self.peringatan = []
+        self.n_persamaan = 0
         self.bab = int(spec["bab"])
         self.istilah = [t for t in spec.get("istilah", ISTILAH)
                         if t not in spec.get("istilah_kecuali", [])]
@@ -208,7 +211,7 @@ class Builder:
         pf.line_spacing = cfg["line"]
         p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
         fl = cfg["first_line"] if first_line is None else first_line
-        if fl:
+        if fl or first_line == 0:
             set_ind(p, left=0, firstLine=fl)
         add_runs(p, text, self.istilah)
         return p
@@ -234,7 +237,7 @@ class Builder:
         if rata != "tengah":
             set_ind(p, left=0, firstLine=0)
         p.paragraph_format.keep_with_next = True
-        r = p.add_run(f"{kind} {self.bab}. ")
+        r = p.add_run(f"{kind} {self.bab}.")
         r.font.name = TNR
         sfx = self.P["seq_suffix"]
         fld = el("w:fldSimple", instr=f" SEQ {kind}_{self.bab}.{sfx} \\* ARABIC ")
@@ -253,7 +256,9 @@ class Builder:
     def figure(self, path, cap):
         path = self.img_path(path)
         if not os.path.exists(path):
-            sys.exit(f"gambar tidak ada: {path}")
+            if self.ketat:
+                sys.exit(f"gambar tidak ada: {path}")
+            return self.figure_kosong(path, cap)
         g = self.P["gambar"]
         with Image.open(path) as im:
             w_px, h_px = im.size
@@ -273,6 +278,30 @@ class Builder:
             self.caption("Gambar", cap)
         return p
 
+    def figure_kosong(self, path, cap):
+        """Gambar belum ada: kotak penanda [ISI: ...] supaya build tetap jalan."""
+        self.peringatan.append(f"gambar tidak ada, diganti penanda: {path}")
+        t = self.doc.add_table(rows=1, cols=1)
+        t.alignment = WD_TABLE_ALIGNMENT.CENTER
+        b = el("w:tblBorders")
+        for side in ("top", "left", "bottom", "right"):
+            b.append(el("w:" + side, val="dashed", sz=8, space=0, color="808080"))
+        t._tbl.tblPr.append(b)
+        cell = t.cell(0, 0)
+        cell.width = Cm(self.P["gambar"]["max_w"] * 0.6)
+        cell._tc.get_or_add_tcPr().append(el("w:vAlign", val="center"))
+        p = cell.paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        pf = p.paragraph_format
+        pf.space_before = Pt(36)
+        pf.space_after = Pt(36)
+        pf.keep_with_next = True
+        set_ind(p, left=0, firstLine=0)
+        add_runs(p, f"[ISI: gambar {os.path.basename(path)}]", [], color="808080")
+        if cap:
+            self.caption("Gambar", cap)
+        return p
+
     def code(self, lines):
         c = self.P["kode"]
         t = self.doc.add_table(rows=1, cols=1)
@@ -285,12 +314,59 @@ class Builder:
         for i, line in enumerate(lines):
             p = cell.paragraphs[0] if i == 0 else cell.add_paragraph()
             p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+            pf = p.paragraph_format
+            pf.line_spacing = 1.0
+            pf.space_before = Pt(0)
+            pf.space_after = Pt(0)
+            set_ind(p, left=0, firstLine=0)
             r = p.add_run(line)
             r.font.name = c["font"]
             r._element.rPr.rFonts.set(qn("w:eastAsia"), c["font"])
             r.font.size = Pt(c["size"])
         self.doc.add_paragraph()
         return t
+
+    def lebar_teks(self):
+        s = self.doc.sections[-1]
+        return int(s.page_width - s.left_margin - s.right_margin)
+
+    def equation(self, eq):
+        """Persamaan di baris sendiri, rata tengah, nomor (bab.n) di kanan."""
+        if isinstance(eq, str):
+            eq = {"rumus": eq}
+        self.n_persamaan += 1
+        lebar = self.lebar_teks()
+        p = self.doc.add_paragraph()
+        pf = p.paragraph_format
+        pf.space_before = Pt(6)
+        pf.space_after = Pt(6)
+        pf.line_spacing = self.P["paragraf"]["line"]
+        pf.keep_together = True
+        set_ind(p, left=0, firstLine=0)
+        tabs = el("w:tabs")
+        tabs.append(el("w:tab", val="center", pos=lebar // 635 // 2))
+        tabs.append(el("w:tab", val="right", pos=lebar // 635))
+        p._p.get_or_add_pPr().append(tabs)
+        p.add_run("\t")
+        add_runs(p, eq["rumus"], [])
+        r = p.add_run(f"\t({self.bab}.{self.n_persamaan})")
+        r.font.name = TNR
+        for par in eq.get("keterangan", []):
+            self.para(par, first_line=0)
+        return p
+
+    def references(self, items):
+        """Daftar pustaka: urut abjad, indent menggantung 1,25 cm."""
+        def kunci(s):
+            return re.sub(r"[*\W_]+", "", s).lower()
+        for item in sorted(items, key=kunci):
+            p = self.doc.add_paragraph()
+            pf = p.paragraph_format
+            pf.space_after = Pt(0)
+            pf.line_spacing = self.P["paragraf"]["line"]
+            p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            set_ind(p, left=709, hanging=709)
+            add_runs(p, item, [])
 
     def table(self, spec):
         cfg = self.P["tabel"]
@@ -353,6 +429,8 @@ class Builder:
                 self.para(b["teks"])
         for par in b.get("paragraf", []):
             self.para(par)
+        for eq in listify(b.get("persamaan")):
+            self.equation(eq)
         if b.get("kode"):
             self.code(b["kode"])
         for tb in listify(b.get("tabel")):
@@ -379,6 +457,8 @@ class Builder:
                     self.item(it, nid)
                 else:
                     self.blok(it, nid)
+        if sec.get("pustaka"):
+            self.references(sec["pustaka"])
         for b in sec.get("penutup", []):
             self.blok(b)
         for sub in sec.get("sub", []):
@@ -391,8 +471,15 @@ class Builder:
             if i:
                 self.brk()
             self.bagian(sec, 0)
+        self.minta_update_field()
         self.doc.save(out)
         return out
+
+    def minta_update_field(self):
+        """Word menawarkan memperbarui field (nomor caption) saat dokumen dibuka."""
+        st = self.doc.settings.element
+        if st.find(qn("w:updateFields")) is None:
+            st.append(el("w:updateFields", val="true"))
 
     def judul(self):
         p = self.doc.add_paragraph(style=self.P["judul_style"])
@@ -436,20 +523,33 @@ def gambar_list(entry):
     return g
 
 
-def build(spec, out):
-    return Builder(spec).build(out)
+def build(spec, out, ketat=False):
+    return Builder(spec, ketat=ketat).build(out)
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("spec")
     ap.add_argument("-o", "--output")
+    ap.add_argument("--ketat", action="store_true",
+                    help="berhenti bila gambar tidak ada, alih-alih memasang penanda [ISI: ...]")
+    ap.add_argument("--tanpa-lint", action="store_true", help="lewati pemeriksaan setelah build")
     a = ap.parse_args()
     with open(a.spec, encoding="utf-8") as f:
         spec = json.load(f)
     spec.setdefault("base_dir", os.path.dirname(os.path.abspath(a.spec)))
     out = a.output or spec.get("output") or "Laporan.docx"
-    print(build(spec, out))
+    b = Builder(spec, ketat=a.ketat)
+    b.build(out)
+    temuan = list(b.peringatan)
+    if not a.tanpa_lint:
+        sys.path.insert(0, HERE)
+        from lint_laprak import lint
+        temuan += lint(out, b.bab)
+    for t in temuan:
+        print("PERINGATAN: " + t)
+    print(f"{len(temuan)} peringatan")
+    print(out)
 
 
 if __name__ == "__main__":

@@ -27,7 +27,7 @@ pip install python-docx pillow
 #    "bikin laprak profil eldas, bab 4. modul: ./modul4.pdf, screenshot: ./shots"
 ```
 
-Buka `.docx` hasilnya di Word, tekan **Ctrl+A lalu F9** supaya nomor gambar dan tabel muncul, lalu baca ulang. Panduan lengkap: [docs/CARA-PAKAI.md](docs/CARA-PAKAI.md).
+Buka `.docx` hasilnya di Word dan setujui tawaran memperbarui field (atau tekan **Ctrl+A lalu F9**) supaya nomor gambar dan tabel muncul, lalu baca ulang. Di Windows, agent bisa melakukannya otomatis lewat `scripts/word_final.ps1`. Panduan lengkap: [docs/CARA-PAKAI.md](docs/CARA-PAKAI.md).
 
 ## Daftar isi
 
