@@ -235,12 +235,25 @@ skills/laprak/
 │   └── profil.json           # parameter format tiap profil
 ├── scripts/
 │   ├── build_laprak.py       # generator spec.json -> .docx
+│   ├── lint_laprak.py        # cek penanda, rujukan Gambar/Tabel, dan gaya
+│   ├── word_final.ps1        # perbarui field + ekspor PDF lewat Word (Windows)
 │   └── selfcheck.py          # uji mandiri semua profil
 └── references/
     ├── spec-schema.md        # bentuk spec.json
     ├── struktur-docx.md      # angka format hasil pembedahan template
     └── bahasa-id.md          # kaidah menulis prosa Indonesia
+skills/laprak-word/
+├── SKILL.md                  # isi atau rapikan template yang terbuka di Word / .docx
+└── references/
+    ├── jalur-b.md            # bangun dari spec memakai skill laprak
+    └── nomor-halaman.md      # aturan nomor halaman dokumen lengkap
 ```
+
+### Skill pendamping: `laprak-word`
+
+`laprak` membangun laporan baru dari `spec.json`. `laprak-word` dipakai saat template dosen sudah ada: terbuka di Word (misalnya lewat Claude for Word, memakai tool add-in `execute_office_js`) atau dilampirkan sebagai `.docx`. Skill ini mengisi satu BAB langsung di dokumen, menjaga style template, dan mengatur penomoran akademik (caption bab.urutan, hierarki heading, nomor halaman untuk dokumen lengkap). Isinya juga memuat aturan menulis analisis, sitasi APA, dan lint rujukan.
+
+Bila tidak ada dokumen terbuka, `laprak-word` beralih ke Jalur B dan memakai generator `laprak`. Jadi pasang keduanya; `npx skills add RavLyr/laporan-praktikum` sudah memasang keduanya sekaligus.
 
 Aturan yang dipegang skill, dan sebaiknya tidak dilanggar:
 
@@ -261,7 +274,9 @@ Aturan yang dipegang skill, dan sebaiknya tidak dilanggar:
 
 **Bisa dipakai tanpa agent?** Bisa. `build_laprak.py` berdiri sendiri, cukup `spec.json` dan gambar.
 
-**Verifikasi visual otomatis?** `SKILL.md` menjelaskan ekspor PDF lewat Word COM dari WSL. Itu khusus Windows atau WSL. Ganti `<USER>` dengan nama user Windows kamu. Di macOS dan Linux, periksa manual di Word.
+**Verifikasi visual otomatis?** Di Windows dengan Word, `scripts/word_final.ps1` memperbarui field, menyimpan, dan mengekspor PDF. Tanpa Word, pakai `soffice --headless --convert-to pdf` lalu periksa hasilnya; nomor caption baru final setelah dibuka di Word.
+
+**Cek ulang laporan yang sudah jadi?** `python skills/laprak/scripts/lint_laprak.py Laporan.docx` melaporkan penanda `[ISI: ...]` yang tersisa, rujukan Gambar atau Tabel yang salah, dan pola gaya.
 
 **Kenapa skill tidak membuatkan cover?** Template hanya mencakup badan laporan. Lengkapi cover, nama, NIM, dan kelompok sendiri.
 
