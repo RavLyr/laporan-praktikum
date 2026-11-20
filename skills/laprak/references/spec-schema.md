@@ -116,6 +116,9 @@ Rujuk di prosa sebagai "Persamaan (5.1)".
 ## Catatan
 
 - `*miring*` memaksa cetak miring. Sisanya dimiringkan otomatis bila cocok daftar `istilah`.
+  Ini hanya berlaku di prosa (paragraf, daftar, pustaka). Heading, caption, sel tabel, dan kode
+  tidak pernah miring; tanda `*` di sana dibuang. Nama merek tidak perlu ditandai, karena tidak
+  ada di daftar `istilah`; bila ada yang terlanjur cocok, keluarkan lewat `"istilah_kecuali"`.
 - Tiap `daftar` memperoleh penomoran sendiri yang mulai dari 1.
 - Rujukan silang ditulis manual, misal "seperti pada Gambar 5.4". Setelah build,
   `lint_laprak.py` berjalan otomatis dan mencetak `PERINGATAN` untuk rujukan yang nomornya

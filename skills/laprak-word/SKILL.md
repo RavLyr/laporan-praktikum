@@ -22,6 +22,7 @@ Pilih jalur di awal berdasarkan apa yang ada, lalu sebutkan satu kalimat jalur m
 | Keadaan | Jalur |
 |---|---|
 | Template terbuka di Word dan tool add-in tersedia (`execute_office_js`, `verify_doc`, `verify_doc_visual`) | **A. Edit langsung** di dokumen terbuka |
+| Template terbuka di Word di Windows, tanpa tool add-in, tetapi agent punya shell (misalnya Claude Code) | **A. Edit live lewat COM**: pakai `scripts/word_live.ps1` dari skill `laprak` (lihat bagian "Mengedit dokumen yang sudah terbuka di Word" di SKILL.md-nya). Backup `.bak` dibuat otomatis, caption memakai `Range.InsertCaption`, berkas yang terbuka ditimpa |
 | Pengguna melampirkan .docx yang harus diisi atau diperbaiki, tanpa tool add-in | **A. Edit salinan** dengan skill `docx`, kembalikan sebagai .docx, sebutkan satu kalimat bahwa verifikasi visual lewat render |
 | Tidak ada dokumen; pengguna memberi modul plus folder screenshot dan minta laporan jadi | **B. Bangun dari spec**: baca `references/jalur-b.md` dan ikuti langkahnya |
 | Dokumen terbuka tetapi pengguna ingin dibangun ulang bersih dari template | tanya satu kali, default A |
@@ -30,9 +31,32 @@ Kedua jalur memakai aturan yang sama: Prinsip utama, analisis, gaya bahasa, sita
 
 ## Prinsip utama
 1. **Data pengguna adalah acuan.** Angka, rumus, screenshot, dan foto dari pengguna dipakai apa adanya. Jangan mengarang data hasil percobaan, nilai komponen, kutipan, nomor halaman, atau referensi. Data yang belum ada ditandai `[ISI: ...]` dan masuk ke daftar cek di akhir.
-2. **Template adalah hukum.** Ikuti struktur, urutan, dan style yang sudah ada. Jangan mengubah margin, font, atau style kecuali pengguna meminta. Urutan prioritas bila ada pertentangan: ketentuan dosen atau kampus di dokumen, lalu template, lalu Bagian 9, lalu default skill ini. Nilai seperti Times New Roman 12 pt, spasi 1,5, atau lebar gambar 14 cm hanyalah default bila template tidak menetapkannya.
+2. **Template adalah hukum.** Ikuti struktur, urutan, dan style yang sudah ada. Jangan mengubah margin, font, atau style kecuali pengguna meminta. Urutan prioritas bila ada pertentangan: ketentuan dosen atau kampus di dokumen, lalu template, lalu Bagian 9, lalu Format umum di bawah. Format umum adalah default untuk semua mata kuliah bila template atau dosen tidak menetapkan lain.
 3. **Tulisan, bukan chat.** Isi dokumen tidak boleh memuat komentar kepada pengguna, basa-basi, atau kalimat seperti "berikut adalah". Catatan untuk pengguna hanya ada di balasan chat.
 4. **Salah di sumber, bilang.** Kalau rumus atau data pengguna tampak keliru, beri tahu singkat di chat dan jangan mengubahnya diam-diam.
+
+## Format umum
+Berlaku untuk semua mata kuliah bila template atau dosen tidak menetapkan lain.
+- **Halaman**: A4, margin kiri 4, atas 4, kanan 3, bawah 3 cm.
+- **Teks**: Times New Roman 12 pt di paragraf, heading, nomor heading, daftar, dan isi tabel. Rata kiri-kanan, spasi 1,5.
+- **Spasi paragraf**: before dan after **0** di semua paragraf, termasuk heading, caption, dan sel tabel.
+- **Page break**: setiap sub-bab level 2 dimulai di halaman baru. Contoh: setelah 12.1 selesai, page break, lalu 12.2; setelah 12.2 selesai, page break, lalu 12.3. Sub-bab level 3 (12.2.1) tidak dipisah halaman.
+- **Paragraf biasa**: indent baris pertama 36 pt, left indent 0, sehingga sejajar dengan teks heading sub-bab.
+- **Heading**: Heading 1 rata tengah dan tebal. Heading 2 dan 3 tebal dengan nomor otomatis, li 36 pt fi −36 pt. Nomor bab dan sub-bab tidak diubah.
+- **Daftar** (Tujuan, langkah kerja, Kesimpulan): li 36 pt fi −36 pt; nomor mepet kiri, teks mulai di 36 pt.
+- **Caption gambar**: di bawah gambar, TNR 10 hitam, tidak miring, rata tengah, spasi 1,5, before/after 0. Paragraf gambar di atasnya spasi 1, before/after 0.
+- **Caption tabel**: di atas tabel, TNR 10 hitam, tidak miring, spasi 1, before/after 0, li 36 pt fi −36 pt.
+- **Tabel data**: `Table Grid`, TNR 12, header tebal dan rata tengah, isi rata tengah, spasi 1,5, tanpa indent. Isi tabel data (alamat IP, VLAN) tidak diubah saat merapikan tabel lain.
+- **Kode CLI**: tabel 1x1 `Table Grid`, Courier New 10, spasi 1, before/after 0, tidak miring.
+- **Miring**: istilah bahasa Inggris di paragraf isi (*port security*, *native VLAN*, *sticky*, *DHCP snooping*). Tidak miring: nama merek, produk, atau perangkat (Cisco, Packet Tracer, Command Prompt, Rogue Laptop), heading, caption, tabel, dan kode.
+- **Placeholder**: gambar atau data yang belum ada ditandai `[ISI: ...]` (di Jalur B berupa kotak abu-abu bergaris putus). Struktur dan isi template tidak dihapus tanpa diminta.
+
+## Aturan isi
+- Jangan menambah bagian Dasar Teori di dokumen apa pun kecuali diminta eksplisit.
+- Langkah kerja tiap percobaan atau konfigurasi (Percobaan 1, 2, dan seterusnya) wajib dipisah. Jangan digabung atau diringkas menjadi satu daftar.
+- Tujuan: tiap butir cukup dua kalimat.
+- Kesimpulan murni menjawab Tujuan, tanpa penanda `[ISI: ...]` dan tanpa data kelompok (alamat IP, nilai ukur, nama kelompok).
+- Bagian yang datanya belum ada (analisis, screenshot) dibiarkan dengan penanda saja; Kesimpulan tetap ditulis dari Tujuan.
 
 ## Langkah kerja
 
@@ -52,11 +76,11 @@ Urutan umum (Eldas): Tujuan, Alat dan Bahan, Langkah Kerja, Hasil Percobaan dan 
 
 | Bagian | Isi | Bentuk |
 |---|---|---|
-| Tujuan | Sesuai jumlah minimal di petunjuk. Satu tujuan satu kalimat, diawali kata kerja (mengamati, menentukan, menganalisis). | Daftar bernomor |
+| Tujuan | Sesuai jumlah minimal di petunjuk. Tiap butir paling banyak dua kalimat, diawali kata kerja (mengamati, menentukan, menganalisis). | Daftar bernomor |
 | Alat dan Bahan | Satu sub-heading per alat. Gambar, caption, satu paragraf fungsi singkat. Sumber gambar internet ditulis di bawahnya. | Sub-heading, tanpa bullet |
-| Langkah Kerja | Dibagi Modul Software dan Modul Hardware. Langkah ringkas, urut, satu tindakan per langkah. Gambar secukupnya. | Daftar bernomor, mulai dari 1 tiap percobaan |
+| Langkah Kerja | Dibagi Modul Software dan Modul Hardware bila template memakainya. Langkah ringkas, urut, satu tindakan per langkah, dipisah per percobaan. Gambar secukupnya. | Daftar bernomor, mulai dari 1 tiap percobaan |
 | Hasil dan Analisis | Tiap percobaan: gambar atau tabel hasil, lalu paragraf analisis. | Heading tingkat empat per percobaan, tanpa bullet |
-| Kesimpulan | Sesuai jumlah minimal. Diambil dari hasil percobaan, bukan dari teori. | Daftar bernomor |
+| Kesimpulan | Sesuai jumlah minimal. Menjawab tiap Tujuan, tanpa penanda dan tanpa data kelompok. | Daftar bernomor |
 | Daftar Pustaka | Hanya sumber yang benar-benar dikutip. APA. | Urut abjad, indent menggantung |
 
 Petunjuk dalam kurung pada heading (misalnya "(Minimal 5)") dihapus setelah bagiannya terisi. Sisanya, teks heading tidak diubah.
@@ -88,7 +112,7 @@ Aturan caption dan nomornya ada di Bagian 9. Di sini yang berlaku untuk isi:
 - Setiap gambar dan tabel dirujuk minimal sekali di prosa ("seperti pada Gambar 6.2", "Tabel 6.1 memuat..."), dengan huruf kapital pada Gambar dan Tabel.
 - Persamaan ditulis di baris sendiri, rata tengah, dengan nomor di kanan: (6.1), (6.2). Simbol dijelaskan satu kali setelah persamaan. Rumus dari pengguna dipakai apa adanya.
 - Tabel data: header tebal, isi rata tengah, angka dengan desimal konsisten dan satuan di header. Ikuti gaya tabel yang sudah ada di dokumen (baca `style` dan `headerRowCount` dari tabel sibling).
-- Kode program atau perintah: dalam tabel satu sel (bukan shape), Courier New 10 pt, spasi 1, before 0 after 0, warna hitam.
+- Kode program atau perintah: dalam tabel satu sel `Table Grid` (bukan shape), Courier New 10 pt, spasi 1, before 0 after 0, warna hitam, tidak miring.
 - Gambar: rata tengah, rasio asli dijaga, lebar tidak melebihi area teks (maksimal sekitar 14 cm untuk profil Eldas). Paragraf gambar tidak dipisah dari caption.
 
 ### 7. Sumber dan sitasi
@@ -117,7 +141,10 @@ Aturan baku karya ilmiah Indonesia. Bila template atau aturan kampus berbeda, te
 #### 9.1 Caption, tabel, gambar (berlaku di kedua mode)
 - Tabel dan gambar bernomor per bab: Tabel 2.1 berarti tabel pertama di Bab II, Gambar 3.2 berarti gambar kedua di Bab III.
 - Judul tabel di atas tabel. Judul gambar di bawah gambar.
-- Caption otomatis di Jalur A: style `Caption`, field `STYLEREF 1 \s` untuk nomor bab, lalu field `SEQ Gambar \* ARABIC \s 1` (atau `SEQ Tabel ...`). Bentuk teks: "Gambar 2.1 Keterangan". Heading 1 harus sudah ada sebelum field dibuat. Setelah itu perbarui semua field dan baca ulang teksnya. Bila template sudah memakai pola field lain, ikuti template. Bila nomor BAB di template diketik manual sehingga STYLEREF gagal, laporkan dan jangan memaksa.
+- Caption wajib fitur caption Word, bukan teks ketikan. Cara baku: `Range.InsertCaption` dengan label manual berisi nomor bab, misalnya "Gambar 6." atau "Tabel 6." (posisi Below untuk gambar, Above untuk tabel). Hasilnya field `SEQ Gambar_6. \* ARABIC`. Word menyisipkan spasi antara label dan nomor; hapus spasi itu sehingga teks menjadi "Gambar 6.1 Keterangan". Lewat COM, matikan sementara `Options.SmartCutPaste` saat menghapus spasi itu, karena kalau tidak Word mengembalikannya. `word_live.ps1 -Aksi caption` sudah melakukan semuanya.
+- Lewat add-in tanpa InsertCaption, sisipkan teks "Gambar 6." lalu field `SEQ Gambar_6. \* ARABIC` tanpa spasi di antaranya. Hasilnya identik dengan InsertCaption.
+- Bila template sudah memakai pola field lain (misalnya `STYLEREF 1 \s` + `SEQ ... \s 1`), ikuti template. Setelah menyisipkan, perbarui semua field dan baca ulang teksnya.
+- Rujukan di badan teks ditulis "Gambar 6.1" dan "Tabel 6.2", sama persis dengan caption.
 - Jalur B memakai format caption repo (teks "Gambar 5." lalu `SEQ Gambar_5.`). Hasil cetaknya sama; jangan dianggap pelanggaran.
 - Selesai bila seluruh caption berbentuk bab.urutan dan urutannya mulai lagi tiap bab.
 

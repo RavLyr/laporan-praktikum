@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Periksa laporan praktikum (.docx): penanda tersisa, rujukan Gambar/Tabel, dan pola gaya.
+"""Periksa laporan praktikum (.docx): penanda tersisa, rujukan Gambar/Tabel, pola gaya,
+dan aturan isi (tanpa Dasar Teori, Tujuan 2 kalimat, Kesimpulan tanpa data kelompok).
 
 Pakai: python lint_laprak.py Laporan.docx [--bab N]
 Dipanggil otomatis oleh build_laprak.py setelah dokumen dibangun.
@@ -21,6 +22,50 @@ GAYA = [
     (re.compile(r"\b(kami|penulis)\b", re.I), "kata ganti orang pertama"),
     (re.compile(r"\bmembuktikan\b", re.I), "klaim 'membuktikan'"),
 ]
+
+
+TEORI = re.compile(r"\b(dasar teori|landasan teori|tinjauan pustaka)\b", re.I)
+KALIMAT = re.compile(r"(?<=[.!?])\s+(?=[A-Z0-9(\"])")
+DATA = re.compile(
+    r"\b\d{1,3}(?:\.\d{1,3}){3}\b"                                   # alamat IP
+    r"|\b\d+(?:[.,]\d+)?\s*(?:mV|V|mA|uA|µA|A|kΩ|Ω|ohm|ms|Hz|kHz|MHz|dB)\b"  # nilai ukur
+    r"|\bkelompok\b", re.I)
+
+
+def isi_bagian(doc):
+    """Kembalikan [(judul heading, [paragraf isi])] berurutan, hanya paragraf badan."""
+    hasil, judul, isi = [], None, []
+    for p in doc.paragraphs:
+        if p.style.name.lower().startswith("heading"):
+            if judul is not None:
+                hasil.append((judul, isi))
+            judul, isi = p.text.strip(), []
+        elif judul is not None and p.text.strip():
+            isi.append(p.text.strip())
+    if judul is not None:
+        hasil.append((judul, isi))
+    return hasil
+
+
+def lint_isi(doc):
+    """Aturan isi: tanpa Dasar Teori, Tujuan maksimal 2 kalimat per butir, Kesimpulan tanpa data."""
+    temuan = []
+    for judul, isi in isi_bagian(doc):
+        kecil = judul.lower()
+        if TEORI.search(judul):
+            temuan.append(f"isi: ada bagian '{judul}'; hapus bila dosen tidak memintanya")
+        elif kecil.startswith("tujuan"):
+            for t in isi:
+                n = len([k for k in KALIMAT.split(t) if k.strip()])
+                if n > 2:
+                    temuan.append(f"isi: butir Tujuan {n} kalimat, cukup 2: {t[:60]}...")
+        elif kecil.startswith("kesimpulan"):
+            for t in isi:
+                if PENANDA.search(t):
+                    temuan.append(f"isi: Kesimpulan memuat penanda, harus menjawab Tujuan saja: {t[:60]}")
+                for m in DATA.finditer(t):
+                    temuan.append(f"isi: Kesimpulan memuat data kelompok ({m.group(0)}): {potong(t, m)}")
+    return temuan
 
 
 def potong(teks, m, lebar=40):
@@ -92,6 +137,7 @@ def lint(path, bab=None):
             for m in pola.finditer(teks):
                 temuan.append(f"gaya ({nama}): {potong(teks, m)}")
 
+    temuan += lint_isi(doc)
     return temuan
 
 
