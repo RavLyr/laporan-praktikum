@@ -11,6 +11,7 @@ from docx.shared import Cm
 from PIL import Image
 
 import build_laprak as B
+import lint_laprak as L
 
 
 def spec(profil, bab):
@@ -29,13 +30,20 @@ def spec(profil, bab):
                 "daftar": [
                     {"teks": "Berkas topologi diunduh.", "gambar": {"file": "a.png", "caption": "Topologi"}},
                     {"teks": "Switch dikonfigurasi.", "kode": ["Switch>enable", "Switch#configure terminal"]},
+                    {"teks": "Hasil ping dicatat.", "gambar": {"file": "belum-ada.png", "caption": "Hasil Ping"}},
                 ],
             }]},
             {"judul": "Hasil dan Analisis", "sub": [{
                 "judul": "Percobaan 1",
-                "isi": [{"paragraf": ["Seluruh tautan aktif dan port trunk menyala."]}],
+                "isi": [{"paragraf": [f"Seluruh tautan aktif dan port trunk menyala, seperti pada Gambar {bab}.1 dan Gambar {bab}.9."],
+                         "persamaan": {"rumus": "Galat = |Vu - Vt| / Vt x 100%",
+                                       "keterangan": ["dengan Vu nilai ukur dan Vt nilai teori."]}}],
             }]},
             {"judul": "Kesimpulan", "daftar": ["VLAN memisahkan domain siar."]},
+            {"judul": "Daftar Pustaka", "pustaka": [
+                "Zeta, A. (2020). *Jaringan Komputer*. Penerbit.",
+                "Alpha, B. (2019). *Elektronika Dasar*. Penerbit.",
+            ]},
         ],
     }
 
@@ -50,7 +58,7 @@ def cek(profil, bab, tmp):
     styles = [p.style.name for p in d.paragraphs]
 
     assert P["judul_style"] in styles, "judul hilang"
-    assert styles.count(P["heading"][0]) == 4, f"{profil}: heading tingkat 1 harus 4"
+    assert styles.count(P["heading"][0]) == 5, f"{profil}: heading tingkat 1 harus 5"
     assert styles.count(P["heading"][1]) == 2, f"{profil}: heading tingkat 2 harus 2"
 
     numb = d.part.numbering_part.element
@@ -87,11 +95,46 @@ def cek(profil, bab, tmp):
         f"{profil}: istilah asing tidak dimiringkan"
 
     brks = sum(1 for p in d.paragraphs if p.paragraph_format.page_break_before)
-    assert brks == 3, f"{profil}: pemisah halaman harus 3, dapat {brks}"
+    assert brks == 4, f"{profil}: pemisah halaman harus 4, dapat {brks}"
 
     for p in d.paragraphs:
         if p.style.name in P["heading"]:
             assert not any(r.italic for r in p.runs), f"{profil}: heading tidak boleh miring"
+
+    # caption: "Gambar 5." menempel langsung ke nomor SEQ, tanpa spasi
+    caps = [p for p in d.paragraphs if p.text.startswith("Gambar")]
+    assert caps and caps[0].runs[0].text == f"Gambar {bab}.", f"{profil}: awalan caption salah"
+
+    # kode: spasi 1, before/after 0
+    for p in tcode.cell(0, 0).paragraphs:
+        pf = p.paragraph_format
+        assert pf.line_spacing == 1.0 and pf.space_after == 0 and pf.space_before == 0, \
+            f"{profil}: spasi kode harus 1 dengan before/after 0"
+
+    # gambar yang belum ada jadi penanda, build tetap jalan
+    assert any("belum-ada.png" in w for w in b.peringatan), f"{profil}: gambar hilang tidak diperingatkan"
+    assert any("[ISI: gambar belum-ada.png]" in t.cell(0, 0).text for t in d.tables), \
+        f"{profil}: penanda gambar hilang tidak ada"
+
+    # persamaan bernomor di kanan
+    eq = next(p for p in d.paragraphs if "Galat" in p.text)
+    assert eq.text.endswith(f"({bab}.1)"), f"{profil}: nomor persamaan salah: {eq.text!r}"
+
+    # daftar pustaka urut abjad, indent menggantung
+    pus = [p for p in d.paragraphs if "Penerbit." in p.text]
+    assert [p.text[:5] for p in pus] == ["Alpha", "Zeta,"], f"{profil}: pustaka tidak urut abjad"
+    ind = pus[0]._p.pPr.find(qn("w:ind"))
+    assert ind.get(qn("w:hanging")) == "709", f"{profil}: pustaka tanpa indent menggantung"
+
+    # Word diminta memperbarui field saat dibuka
+    assert d.settings.element.find(qn("w:updateFields")) is not None, f"{profil}: updateFields tidak ada"
+
+    # lint menangkap penanda, rujukan salah, dan tabel yang tidak dirujuk
+    temuan = L.lint(out, bab)
+    assert any("penanda tersisa" in t for t in temuan), f"{profil}: lint tidak menangkap penanda"
+    assert any(f"Gambar {bab}.9 tidak ada" in t for t in temuan), f"{profil}: lint tidak menangkap rujukan salah"
+    assert any(f"Tabel {bab}.1 tidak dirujuk" in t for t in temuan), f"{profil}: lint tidak menangkap tabel tak dirujuk"
+    assert not any(f"Gambar {bab}.1 tidak dirujuk" in t for t in temuan), f"{profil}: lint salah menandai gambar yang dirujuk"
 
     print(f"  {profil} OK")
 

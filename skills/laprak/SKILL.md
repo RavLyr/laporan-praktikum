@@ -36,19 +36,29 @@ Path `scripts/`, `assets/`, `references/` di bawah relatif terhadap folder skill
    ```bash
    python scripts/build_laprak.py spec.json -o "Laporan-Modul-N.docx"
    ```
-   Butuh `python-docx` dan `pillow`.
-7. Verifikasi: ekspor PDF lewat Word COM, render beberapa halaman, periksa visual.
-   ```bash
-   cp out.docx /mnt/c/Users/<USER>/cek.docx
-   powershell.exe -NoProfile -Command "\$w=New-Object -ComObject Word.Application; \$w.Visible=\$false; \$w.DisplayAlerts=0; \$d=\$w.Documents.Open('C:\Users\<USER>\cek.docx',[ref]\$false,[ref]\$true); \$d.Fields.Update(); \$d.ExportAsFixedFormat('C:\Users\<USER>\cek.pdf',17); \$d.Close(0); \$w.Quit()"
-   pdftoppm -png -r 70 /mnt/c/Users/<USER>/cek.pdf /tmp/cek/p
-   ```
-   Nama berkas Windows harus baru tiap ekspor, kalau tidak Word memakai cache.
+   Butuh `python-docx` dan `pillow`. Setelah build, `scripts/lint_laprak.py` berjalan otomatis
+   dan mencetak `PERINGATAN` untuk penanda `[ISI: ...]` yang tersisa, rujukan Gambar atau
+   Tabel yang nomornya tidak ada, gambar atau tabel yang tidak dirujuk, dan pola gaya.
+   Tangani tiap temuan satu per satu, jangan diganti otomatis. Gambar yang belum ada diganti
+   kotak `[ISI: gambar ...]`; tambahkan `--ketat` bila ingin build berhenti.
+7. Finalisasi dan verifikasi visual. Pilih sesuai mesin:
+   - **Windows dengan Microsoft Word** (paling baik): perbarui semua field, simpan, dan ekspor PDF.
+     Pengguna tidak perlu lagi menekan Ctrl+A lalu F9.
+     ```bash
+     powershell -NoProfile -ExecutionPolicy Bypass -File scripts/word_final.ps1 -Docx Laporan-Modul-N.docx -Pdf cek.pdf
+     ```
+     Dari WSL, salin dulu ke folder Windows dan panggil `powershell.exe` dengan path Windows.
+   - **Tanpa Word** (Linux, sandbox): `soffice --headless --convert-to pdf Laporan-Modul-N.docx`
+     lalu `pdftoppm -png -r 70 Laporan-Modul-N.pdf cek/p`. Nomor caption di render ini bisa
+     masih "1"; Word menawarkan pembaruan field saat dokumen dibuka (`updateFields` sudah dipasang).
+   Baca PDF atau PNG hasilnya dan periksa halaman berisi tabel, kode, dan gambar.
 
 ## Aturan yang tidak boleh dilanggar
 
 - Nomor gambar dan tabel memakai field `SEQ`, jangan diketik manual. Nomor baru muncul
-  setelah `Fields.Update()` di Word.
+  setelah field diperbarui di Word (`word_final.ps1`, atau Word menawarkannya saat dibuka).
+- Data yang belum ada ditulis `[ISI: ...]`, sumber yang belum pasti `[CEK SUMBER: ...]`.
+  Jangan mengarang angka hasil percobaan.
 - Nomor BAB menyetir seluruh penomoran. Cukup set `"bab": N`; skrip menambal `numbering.xml`.
 - Ukuran gambar dibatasi profil, rasio asli dijaga, rata tengah, caption tepat di bawahnya.
 - Caption tabel diletakkan **di atas** tabel.
@@ -63,6 +73,8 @@ Path `scripts/`, `assets/`, `references/` di bawah relatif terhadap folder skill
 - `assets/srwe.docx`, `assets/eldas.docx` — template kosong hasil pelucutan dokumen resmi. Jangan ditimpa.
 - `assets/profil.json` — parameter format tiap profil.
 - `scripts/build_laprak.py` — generator.
+- `scripts/lint_laprak.py` — pemeriksa rujukan, penanda, dan gaya; juga bisa dipakai pada .docx lain: `python scripts/lint_laprak.py Laporan.docx`.
+- `scripts/word_final.ps1` — perbarui field, simpan, dan ekspor PDF lewat Word (Windows).
 - `scripts/selfcheck.py` — uji mandiri seluruh profil.
 - `references/spec-schema.md` — bentuk spec.
 - `references/struktur-docx.md` — angka format hasil pembedahan kedua template.
@@ -74,4 +86,5 @@ Path `scripts/`, `assets/`, `references/` di bawah relatif terhadap folder skill
 python scripts/selfcheck.py
 ```
 Membangun dokumen contoh tiap profil lalu memeriksa style, penomoran, warna header,
-ukuran gambar, field SEQ, pemisah halaman, dan kemiringan heading.
+ukuran gambar, field SEQ, pemisah halaman, kemiringan heading, spasi kode, penanda gambar
+kosong, nomor persamaan, urutan pustaka, dan hasil lint.
