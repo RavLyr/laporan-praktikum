@@ -21,6 +21,38 @@ timpa sebagian lewat `"profil_override"` kalau dosen minta variasi kecil.
 Profil baru: salin `.docx` acuan ke `assets/`, tambahkan entri di `assets/profil.json`,
 jalankan `scripts/selfcheck.py`.
 
+## Format umum (semua profil, semua mata kuliah)
+
+Generator menerapkan ini tanpa perlu diatur di spec. Bila dosen meminta lain, ketentuan dosen
+yang dipakai lewat `profil_override`.
+
+| Unsur | Format |
+|---|---|
+| Halaman | A4, margin kiri 4, atas 4, kanan 3, bawah 3 cm |
+| Teks | Times New Roman 12 pt di semua paragraf, heading, nomor heading, daftar, dan isi tabel |
+| Spasi | before dan after **0** di semua paragraf; spasi baris 1,5 kecuali yang disebut lain |
+| Page break | setiap sub-bab level 2 (x.2, x.3, ...) mulai di halaman baru; level 3 tidak |
+| Paragraf | rata kiri-kanan, indent baris pertama 36 pt |
+| Heading, daftar, caption tabel | indent menggantung li 36 pt fi −36 pt; nomor mepet kiri, teks mulai di 36 pt |
+| Caption gambar | di bawah gambar, TNR 10 hitam, tidak miring, rata tengah, spasi 1,5 |
+| Caption tabel | di atas tabel, TNR 10 hitam, tidak miring, spasi 1 |
+| Nomor caption | "Gambar 6.1", field `SEQ Gambar_6.` (sama dengan Word InsertCaption berlabel "Gambar 6."), tanpa spasi sebelum nomor |
+| Paragraf gambar | spasi 1, rata tengah |
+| Tabel data | `Table Grid` selebar teks, header tebal, isi rata tengah, spasi 1,5, tanpa indent |
+| Kode CLI | tabel 1x1 `Table Grid`, Courier New 10, spasi 1, tidak miring |
+| Miring | istilah asing di prosa saja. Heading, caption, tabel, kode, dan nama merek (Cisco, Packet Tracer) tidak miring |
+| Gambar belum ada | kotak abu-abu bergaris putus berisi `[ISI: gambar ...]`, caption tetap ada |
+
+## Aturan isi
+
+- Jangan menambah bagian Dasar Teori kecuali diminta eksplisit.
+- Langkah kerja tiap percobaan dipisah (Percobaan 1, Percobaan 2, ...), tidak digabung jadi satu daftar.
+- Tiap butir Tujuan cukup dua kalimat.
+- Kesimpulan murni menjawab Tujuan: tanpa penanda `[ISI: ...]` dan tanpa data kelompok (alamat IP, nilai ukur).
+- Bagian yang datanya belum ada (analisis, screenshot) tetap ditulis dengan penanda; struktur template tidak dihapus.
+
+Lint memeriksa empat aturan pertama dan mencetak `PERINGATAN` bila dilanggar.
+
 ## Alur
 
 Path `scripts/`, `assets/`, `references/` di bawah relatif terhadap folder skill ini, bukan folder kerja pengguna.
@@ -53,6 +85,29 @@ Path `scripts/`, `assets/`, `references/` di bawah relatif terhadap folder skill
      masih "1"; Word menawarkan pembaruan field saat dokumen dibuka (`updateFields` sudah dipasang).
    Baca PDF atau PNG hasilnya dan periksa halaman berisi tabel, kode, dan gambar.
 
+### Mengedit dokumen yang sudah terbuka di Word (Windows)
+
+Bila pengguna sudah punya laporan atau template dosen yang terbuka di Word dan minta dilengkapi
+di tempat, jangan bangun ulang dari spec. Pakai `scripts/word_live.ps1`, yang menempel ke Word
+lewat COM (GetActiveObject) dan menimpa berkas yang terbuka:
+
+```bash
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/word_live.ps1 -Aksi info
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/word_live.ps1 -Aksi caption -Jenis Gambar -Indeks 3 -Bab 6 -Teks "Topologi Percobaan 1"
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/word_live.ps1 -Aksi update
+```
+
+- `info` mendaftar heading, gambar, dan tabel beserta indeks dan caption-nya.
+- `caption` memakai `Range.InsertCaption` asli berlabel "Gambar 6." atau "Tabel 6.", menghapus
+  spasi sebelum nomor, lalu menerapkan format caption di atas. Gambar atau tabel yang sudah
+  punya caption dilewati.
+- `update` memperbarui semua field lalu menyimpan.
+- Sebelum mengubah apa pun, skrip menyalin berkas ke `.bak` (tidak pernah menimpa `.bak` lama).
+- Tabel data (alamat IP, VLAN) tidak diubah isinya; cek `info` sebelum memasang caption supaya
+  indeks tabel tidak tertukar dengan tabel kode.
+- Isi teks lain ditulis lewat COM Word yang sama, mengikuti Format umum dan Aturan isi di atas.
+- `-Docx berkas.docx` membuka berkas tertentu bila Word belum membukanya.
+
 ## Aturan yang tidak boleh dilanggar
 
 - Nomor gambar dan tabel memakai field `SEQ`, jangan diketik manual. Nomor baru muncul
@@ -75,6 +130,7 @@ Path `scripts/`, `assets/`, `references/` di bawah relatif terhadap folder skill
 - `scripts/build_laprak.py` — generator.
 - `scripts/lint_laprak.py` — pemeriksa rujukan, penanda, dan gaya; juga bisa dipakai pada .docx lain: `python scripts/lint_laprak.py Laporan.docx`.
 - `scripts/word_final.ps1` — perbarui field, simpan, dan ekspor PDF lewat Word (Windows).
+- `scripts/word_live.ps1` — edit dokumen yang terbuka di Word: backup `.bak`, caption InsertCaption, update field (Windows).
 - `scripts/selfcheck.py` — uji mandiri seluruh profil.
 - `references/spec-schema.md` — bentuk spec.
 - `references/struktur-docx.md` — angka format hasil pembedahan kedua template.
@@ -87,4 +143,6 @@ python scripts/selfcheck.py
 ```
 Membangun dokumen contoh tiap profil lalu memeriksa style, penomoran, warna header,
 ukuran gambar, field SEQ, pemisah halaman, kemiringan heading, spasi kode, penanda gambar
-kosong, nomor persamaan, urutan pustaka, dan hasil lint.
+kosong, nomor persamaan, urutan pustaka, dan hasil lint. Format umum diperiksa di setiap
+paragraf: font dan ukuran, before/after 0, indent, format caption, tabel tanpa miring,
+dan page break hanya sebelum sub-bab level 2.

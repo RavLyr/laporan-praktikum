@@ -47,7 +47,10 @@ Buka `.docx` hasilnya di Word dan setujui tawaran memperbarui field (atau tekan 
 - Heading bernomor otomatis (BAB V, 5.1, 5.1.1) dari satu nilai `"bab"`.
 - Caption gambar dan tabel memakai field `SEQ` Word, bukan ketikan manual.
 - Tabel data berwarna, tabel kode (Courier New), gambar rata tengah dengan rasio asli dan caption tepat di bawahnya.
-- Istilah asing dimiringkan otomatis di prosa, tidak di heading.
+- Istilah asing dimiringkan otomatis di prosa, tidak di heading, caption, tabel, atau kode.
+- Format umum semua mata kuliah: Times New Roman 12, before/after 0, indent 36 pt, dan setiap sub-bab level 2 di halaman baru.
+- Caption identik dengan hasil Word InsertCaption ("Gambar 6.1", field `SEQ Gambar_6.`).
+- Edit dokumen yang sedang terbuka di Word lewat COM dengan backup `.bak` otomatis (`word_live.ps1`).
 - Selalu dibangun dari template di `assets/`, jadi style, penomoran, dan font identik dengan dokumen resmi.
 - Pedoman menulis prosa Indonesia yang tidak terbaca kaku atau seperti keluaran AI ([bahasa-id.md](skills/laprak/references/bahasa-id.md)).
 - Uji mandiri untuk semua profil: `python skills/laprak/scripts/selfcheck.py`.
@@ -237,6 +240,7 @@ skills/laprak/
 │   ├── build_laprak.py       # generator spec.json -> .docx
 │   ├── lint_laprak.py        # cek penanda, rujukan Gambar/Tabel, dan gaya
 │   ├── word_final.ps1        # perbarui field + ekspor PDF lewat Word (Windows)
+│   ├── word_live.ps1         # edit dokumen yang terbuka di Word: .bak, InsertCaption (Windows)
 │   └── selfcheck.py          # uji mandiri semua profil
 └── references/
     ├── spec-schema.md        # bentuk spec.json
